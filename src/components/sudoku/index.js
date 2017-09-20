@@ -31,6 +31,9 @@ export default class Sudoku extends Component {
     onChangeAt = (i, j) => {
         return (e) => {
             let num = parseInt(e.target.value);
+            if (isNaN(num)) num = 0;
+            if (num < 0) num = 0;
+            if (num > 9) num = 9;
             const data = this.state.data.slice();
             data[i][j] =  num;
             this.setState({ data });
@@ -41,7 +44,8 @@ export default class Sudoku extends Component {
         const table = this.state.data.map(row => row.map(cell => cell === "" ? "0" : cell).join("")).join("");
         axios.get('/solve?table=' + table).then(result => {
             if (result.data.status === 'ok')
-                this.setState({ data: result.data.result });
+                // this.setState({ data: result.data.result });
+                alert(result.data.result);
             console.log(result.data);
         }).catch(err => {
             console.log(err);

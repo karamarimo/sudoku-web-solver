@@ -19,7 +19,7 @@ def solve(table):
     def v(i, j, k):
         """ return the variable index for row i, column j, number k
         """
-        return i * 9 * 9 + j * 9 + k
+        return i * 9 * 9 + j * 9 + k - 1
 
     vcount = 9 * 9 * 9
     variables = {
@@ -32,19 +32,19 @@ def solve(table):
     # cell constraints
     for row in range(9):
         for col in range(9):
-            inequal.append([[v(row, col, num) for num in range(9)], [1.0] * 9])
+            inequal.append([[v(row, col, num) for num in range(1, 10)], [1.0] * 9])
     # row constraints
     for row in range(9):
-        for num in range(9):
+        for num in range(1, 10):
             inequal.append([[v(row, col, num) for col in range(9)], [1.0] * 9])
     # column constraints
     for col in range(9):
-        for num in range(9):
+        for num in range(1, 10):
             inequal.append([[v(row, col, num) for row in range(9)], [1.0] * 9])
     # block constraints
     for block_row in range(0, 9, 3):
         for block_col in range(0, 9, 3):
-            for num in range(9):
+            for num in range(1, 10):
                 inequal.append(
                     [[v(row, col, num) for row in range(block_row, block_row + 3)
                         for col in range(block_col, block_col + 3)],
@@ -60,7 +60,7 @@ def solve(table):
                 equal_rhs.append(float(num))
     constraints = {
         "lin_expr": inequal + equal,
-        "senses": "L" * len(inequal) + "E" * len(equal),
+        "senses": "E" * len(inequal) + "E" * len(equal),
         "rhs": [1.0] * len(inequal) + equal_rhs,
         # "names": ["c1", "c2"],  # row names
     }
@@ -81,9 +81,18 @@ def solve(table):
     # solve!!!
     prob.solve()
 
-    results = prob.solution.get_values()
-    results = [results[i * 9:i * 9 + 9] for i in range(9)]
-    return results
+    x = prob.solution.get_values()
+    result = []
+    for row in range(9):
+        line = []
+        for col in range(9):
+            for num in range(1, 10):
+                if x[v(row, col, num)] == 1.0:
+                    line.append(num)
+                    break
+        result.append(line)
+    
+    return result
 
 def printLPSolution(solution):
     print(solution.status[solution.get_status()])
