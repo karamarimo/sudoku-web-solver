@@ -1,0 +1,10 @@
+.home {
+	padding: 56px 20px;
+	min-height: 100%;
+	width: 100%;
+}
+
+.cell {
+    width: 20px;
+    height: 20px;
+}
