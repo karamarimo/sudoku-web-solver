@@ -43,10 +43,11 @@ export default class Sudoku extends Component {
     handleClick = () => {
         const table = this.state.data.map(row => row.map(cell => cell === "" ? "0" : cell).join("")).join("");
         axios.get('/solve?table=' + table).then(result => {
-            if (result.data.status === 'ok')
+            if (result.data.status === 'ok') {
                 this.setState({ data: result.data.result });
-                // alert(result.data.result);
-            console.log(result.data);
+            } else {
+                alert("unsolvable");
+            }
         }).catch(err => {
             console.log(err);
             alert("something wrong");
@@ -56,9 +57,14 @@ export default class Sudoku extends Component {
     render({ }, { data }) {
         const range9 = [0,1,2,3,4,5,6,7,8];
         const listItems = range9.map((i) => {
-            const line = range9.map((j) => (
-                <td class={style.cell}><input type="number" min="1" max="9" class={style.input} value={data[i][j]} onChange={this.onChangeAt(i, j)} /></td>
-            ));
+            const line = range9.map((j) => {
+                let value = data[i][j];
+                value = value === 0 ? "" : value;
+                return (
+                    <td class={style.cell}><input type="number" min="1" max="9" class={style.input} 
+                        value={value} onChange={this.onChangeAt(i, j)} /></td>
+                )
+            });
             return <tr class={style.row}>{line}</tr>;
         });
         return (
