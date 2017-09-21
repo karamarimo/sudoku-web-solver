@@ -23,24 +23,24 @@ def solve(table):
 
     vcount = 9 * 9 * 9
     variables = {
-        "obj": [1.0] * vcount,                      # coefficients of the obj func
+        "obj": [1] * vcount,                      # coefficients of the obj func
         "types": "B" * vcount,                      # variable types (integer or continuous)
                                                     #   specifying types makes the problem a MIP
-        "names": ['x{}{}{}'.format(i, j, k) for i in range(9) for j in range(9) for k in range(9)],
+        "names": ['x{}{}{}'.format(i, j, k) for i in range(9) for j in range(9) for k in range(1, 10)],
     }
     inequal = []
     # cell constraints
     for row in range(9):
         for col in range(9):
-            inequal.append([[v(row, col, num) for num in range(1, 10)], [1.0] * 9])
+            inequal.append([[v(row, col, num) for num in range(1, 10)], [1] * 9])
     # row constraints
     for row in range(9):
         for num in range(1, 10):
-            inequal.append([[v(row, col, num) for col in range(9)], [1.0] * 9])
+            inequal.append([[v(row, col, num) for col in range(9)], [1] * 9])
     # column constraints
     for col in range(9):
         for num in range(1, 10):
-            inequal.append([[v(row, col, num) for row in range(9)], [1.0] * 9])
+            inequal.append([[v(row, col, num) for row in range(9)], [1] * 9])
     # block constraints
     for block_row in range(0, 9, 3):
         for block_col in range(0, 9, 3):
@@ -48,37 +48,36 @@ def solve(table):
                 inequal.append(
                     [[v(row, col, num) for row in range(block_row, block_row + 3)
                         for col in range(block_col, block_col + 3)],
-                    [1.0] * 9])
+                    [1] * 9])
     # specified cells
     equal = []
-    equal_rhs = []
     for row in range(9):
         for col in range(9):
             num = table[row][col]
             if num != 0:
-                equal.append([[v(row, col, num)], [1.0]])
-                equal_rhs.append(float(num))
+                equal.append([[v(row, col, num)], [1]])
     constraints = {
         "lin_expr": inequal + equal,
         "senses": "E" * len(inequal) + "E" * len(equal),
-        "rhs": [1.0] * len(inequal) + equal_rhs,
+        "rhs": [1] * len(inequal) + [1] * len(equal),
         # "names": ["c1", "c2"],  # row names
     }
     # create a problem instance
     prob = cplex.Cplex()
+    # disable output
     prob.set_error_stream(None)
     prob.set_log_stream(None)
     prob.set_results_stream(None)
     prob.set_warning_stream(None)
     # maximize the objective
-    prob.objective.set_sense(prob.objective.sense.maximize)
+    prob.objective.set_sense(prob.objective.sense.minimize)
     # add variables and constraints
     prob.variables.add(**variables)
     prob.linear_constraints.add(**constraints)
 
-    prob.write('sudoku.mps')
+    # prob.write('sudoku.sav')
 
-    # solve!!!
+    # solve
     prob.solve()
 
     x = prob.solution.get_values()
@@ -87,7 +86,7 @@ def solve(table):
         line = []
         for col in range(9):
             for num in range(1, 10):
-                if x[v(row, col, num)] == 1.0:
+                if x[v(row, col, num)] == 1:
                     line.append(num)
                     break
         result.append(line)
