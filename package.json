@@ -6,8 +6,8 @@
   "scripts": {
     "test": "eslint src && preact test",
     "start": "if-env NODE_ENV=production && npm run -s serve || npm run -s dev",
-    "build": "preact build --clean false",
-    "serve": "preact build --clean false && node src/server/main.js",
+    "build": "preact build --clean=false",
+    "serve": "preact build --clean=false && node src/server/main.js",
     "dev": "preact watch"
   },
   "keywords": [],
